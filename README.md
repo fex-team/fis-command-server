@@ -1,8 +1,8 @@
 # fis-command-server
 
-## $ fis server --help
+## Usage
 
-    Usage: server <command> [options]
+    Usage: fis server <command> [options]
     
     Commands:
     
