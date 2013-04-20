@@ -1,18 +1,15 @@
 /.idea
-/.settings
-/.project
-/.gitignore
-/.tmp
-/node_modules
-/test
+node_modules/
+
 /log.txt
 /pid
 
-/www/java/
-/www/WEB-INF/
+src/
+
+java/
+WEB-INF/
 
 .DS_Store
-
 *.db
 *.bak
 *.tmp
