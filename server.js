@@ -213,7 +213,7 @@ exports.register = function(commander, fis){
                     options = arguments[2];
                     if(typeof name === 'string'){
                         name = name.split('@');
-                        var version = name[1] || '0';
+                        var version = name[1] || 'latest';
                         name = name[0];
                         var remote = fis.config.get(
                             'system.repos', fis.project.DEFAULT_REMOTE_REPOS
