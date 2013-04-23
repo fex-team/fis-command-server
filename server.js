@@ -28,24 +28,22 @@ exports.register = function(commander){
             if(isWin){
                 list = require('child_process').spawn('tasklist');
             } else {
-                list = require('child_process').spawn('ps', ['a']);
+                list = require('child_process').spawn('ps');
             }
             list.stdout.on('data', function(chunk){
                 msg += chunk.toString('utf8').toLowerCase();
             });
             list.on('exit', function(){
-                var reg = /\b(node|java)\b/;
                 var indexs = {
                     'node' : 0,
                     'java' : 1
                 };
                 msg.split(/[\r\n]+/).forEach(function(item){
-                    var match = item.match(reg);
+                    var match = item.match(/\b(node|java)\b/i);
                     if(match){
-                        item = item.split(/\s+/);
-                        var id = item[isWin ? 1 : 0];
-                        if(id == pid[indexs[match[1]]]){
-                            process.kill(id);
+                        var iMatch = item.match(/\d+/);
+                        if(iMatch && iMatch[0] == pid[indexs[match[1]]]){
+                            process.kill(iMatch[0]);
                         }
                     }
                 });
