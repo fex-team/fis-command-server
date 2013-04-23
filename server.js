@@ -8,7 +8,7 @@
 exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a php-cgi server';
-exports.register = function(commander, fis){
+exports.register = function(commander){
     
     function getConf(){
         return fis.project.getTempPath('server/conf.json');
