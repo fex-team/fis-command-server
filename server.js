@@ -34,7 +34,7 @@ exports.register = function(commander){
                 msg += chunk.toString('utf8').toLowerCase();
             });
             list.on('exit', function(){
-                var indexs = {
+                var names = {
                     'node' : 0,
                     'java' : 1
                 };
@@ -42,7 +42,8 @@ exports.register = function(commander){
                     var match = item.match(/\b(node|java)\b/i);
                     if(match){
                         var iMatch = item.match(/\d+/);
-                        if(iMatch && iMatch[0] == pid[indexs[match[1]]]){
+                        var index = match[1].toLowerCase();
+                        if(iMatch && iMatch[0] == pid[names[index]]){
                             process.kill(iMatch[0]);
                         }
                     }
