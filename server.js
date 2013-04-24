@@ -5,7 +5,7 @@
 
 'use strict';
 
-var TIMEOUT = 10000;
+var TIMEOUT = 20000;
 
 exports.name = 'server';
 exports.usage = '<command> [options]';
