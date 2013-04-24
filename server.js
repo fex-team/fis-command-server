@@ -139,7 +139,7 @@ exports.register = function(commander){
                         fis.log.debug('document root [' + opt.root + ']');
                         process.stdout.write('starting fis-server on port : ');
                         
-                        var timeout = opt.timeout;
+                        var timeout = Math.max(opt.timeout * 1000, 5000);
                         delete opt.timeout;
                         
                         var cmd = [
