@@ -10,6 +10,9 @@ exports.usage = '<command> [options]';
 exports.desc = 'launch a php-cgi server';
 exports.register = function(commander){
     
+    var child_process = require('child_process');
+    var spawn = child_process.spawn;
+    
     function getConf(){
         return fis.project.getTempPath('server/conf.json');
     }
@@ -26,9 +29,9 @@ exports.register = function(commander){
             var list, msg = '';
             var isWin = fis.util.isWin();
             if(isWin){
-                list = require('child_process').spawn('tasklist');
+                list = spawn('tasklist');
             } else {
-                list = require('child_process').spawn('ps');
+                list = spawn('ps');
             }
             list.stdout.on('data', function(chunk){
                 msg += chunk.toString('utf8').toLowerCase();
@@ -70,6 +73,11 @@ exports.register = function(commander){
         return version;
     }
     
+    function open(path){
+        var cmd = fis.util.isWin() ? 'start' : 'open';
+        child_process.exec(cmd + ' ' + fis.util.escapeShellArg(path));
+    }
+    
     function start(opt){
         var tmp = getConf();
         if(opt){
@@ -93,8 +101,6 @@ exports.register = function(commander){
         } else {
             fis.log.error('invalid document root');
         }
-        
-        var spawn = require('child_process').spawn;
         
         //check java
         process.stdout.write('checking java support : ');
@@ -154,9 +160,11 @@ exports.register = function(commander){
                                 var content = fis.util.fs.readFileSync(log).toString('utf8').substring(lastIndex);
                                 lastIndex += content.length;
                                 if(content.indexOf('Started SelectChannelConnector@') > 0){
-                                    process.stdout.write(opt.port + '\n');
                                     clearInterval(timer);
+                                    process.stdout.write(opt.port + '\n');
+                                    open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
                                 } else if(content.indexOf('Exception:') > 0) {
+                                    clearInterval(timer);
                                     var match = content.match(/exception:\s+([^\r\n:]+)/i);
                                     var msg = 'server fails to start at port [' + opt.port + '], error: ';
                                     if(match){
@@ -267,8 +275,7 @@ exports.register = function(commander){
                     if(fis.util.isFile(conf)){
                         conf = fis.util.readJSON(conf);
                         if(fis.util.isDir(conf.root)){
-                            var open = fis.util.isWin() ? 'start' : 'open';
-                            require('child_process').exec(open + ' ' + fis.util.escapeShellArg(conf.root));
+                            open(conf.root);
                         }
                     }
                     break;
