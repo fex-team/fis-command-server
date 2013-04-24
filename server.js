@@ -5,6 +5,8 @@
 
 'use strict';
 
+var TIMEOUT = 10000;
+
 exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a php-cgi server';
@@ -151,30 +153,36 @@ exports.register = function(commander){
                         var log = fis.util(__dirname, '/log.txt');
                         fis.util.write(log, '');
                         var lastModified = fis.util.mtime(log).getTime();
+                        var startTime = (new Date).getTime();
                         var lastIndex = 0;
+                        var errMsg = 'server fails to start at port [' + opt.port + '], error: ';
                         fis.util.nohup(cmd, { cwd : __dirname });
                         var timer = setInterval(function(){
-                            var mtime = fis.util.mtime(log).getTime();
-                            if(lastModified !== mtime){
-                                lastModified = mtime;
-                                var content = fis.util.fs.readFileSync(log).toString('utf8').substring(lastIndex);
-                                lastIndex += content.length;
-                                if(content.indexOf('Started SelectChannelConnector@') > 0){
-                                    clearInterval(timer);
-                                    process.stdout.write(opt.port + '\n');
-                                    open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
-                                } else if(content.indexOf('Exception:') > 0) {
-                                    clearInterval(timer);
-                                    var match = content.match(/exception:\s+([^\r\n:]+)/i);
-                                    var msg = 'server fails to start at port [' + opt.port + '], error: ';
-                                    if(match){
-                                        msg += match[1];
-                                    } else {
-                                        msg += 'unknown';
+                            if((new Date).getTime() - startTime < TIMEOUT){
+                                var mtime = fis.util.mtime(log).getTime();
+                                if(lastModified !== mtime){
+                                    lastModified = mtime;
+                                    var content = fis.util.fs.readFileSync(log).toString('utf8').substring(lastIndex);
+                                    lastIndex += content.length;
+                                    if(content.indexOf('Started SelectChannelConnector@') > 0){
+                                        clearInterval(timer);
+                                        process.stdout.write(opt.port + '\n');
+                                        open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
+                                    } else if(content.indexOf('Exception:') > 0) {
+                                        clearInterval(timer);
+                                        var match = content.match(/exception:\s+([^\r\n:]+)/i);
+                                        if(match){
+                                            errMsg += match[1];
+                                        } else {
+                                            errMsg += 'unknown';
+                                        }
+                                        process.stdout.write('\n');
+                                        fis.log.error(errMsg);
                                     }
-                                    process.stdout.write('\n');
-                                    fis.log.error(msg);
                                 }
+                            } else {
+                                process.stdout.write('\n');
+                                fis.log.error(errMsg + 'timeout');
                             }
                         }, 200);
                     } else {
