@@ -5,8 +5,6 @@
 
 'use strict';
 
-var TIMEOUT = 20000;
-
 exports.name = 'server';
 exports.usage = '<command> [options]';
 exports.desc = 'launch a php-cgi server';
@@ -140,6 +138,10 @@ exports.register = function(commander){
                     if(phpVersion){
                         fis.log.debug('document root [' + opt.root + ']');
                         process.stdout.write('starting fis-server on port : ');
+                        
+                        var timeout = opt.timeout;
+                        delete opt.timeout;
+                        
                         var cmd = [
                             fis.util.escapeShellArg(process.execPath),
                             fis.util.escapeShellArg(fis.util(__dirname, 'child.js'))
@@ -150,15 +152,18 @@ exports.register = function(commander){
                             }
                             cmd += ' --' + key + ' ' + value;
                         });
+                        
+                        //watch log
                         var log = fis.util(__dirname, '/log.txt');
                         fis.util.write(log, '');
                         var lastModified = fis.util.mtime(log).getTime();
                         var startTime = (new Date).getTime();
                         var lastIndex = 0;
                         var errMsg = 'server fails to start at port [' + opt.port + '], error: ';
+                        fis.log.debug('start command : ' + cmd);
                         fis.util.nohup(cmd, { cwd : __dirname });
                         var timer = setInterval(function(){
-                            if((new Date).getTime() - startTime < TIMEOUT){
+                            if((new Date).getTime() - startTime < timeout){
                                 var mtime = fis.util.mtime(log).getTime();
                                 if(lastModified !== mtime){
                                     lastModified = mtime;
@@ -223,6 +228,7 @@ exports.register = function(commander){
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
         .option('--script <name>', 'rewrite entry file name', String)
+        .option('--timeout <seconds>', 'rewrite entry file name', parseInt, 10)
         .option('--php_exec <path>', 'path to php-cgi executable file', String)
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
