@@ -142,10 +142,33 @@ exports.register = function(commander){
                             }
                             cmd += ' --' + key + ' ' + value;
                         });
+                        var log = fis.util(__dirname, '/log.txt');
+                        fis.util.write(log, '');
+                        var lastModified = fis.util.mtime(log).getTime();
+                        var lastIndex = 0;
                         fis.util.nohup(cmd, { cwd : __dirname });
-                        setTimeout(function(){
-                            process.stdout.write(opt.port + '\n');
-                        }, 2000);
+                        var timer = setInterval(function(){
+                            var mtime = fis.util.mtime(log).getTime();
+                            if(lastModified !== mtime){
+                                lastModified = mtime;
+                                var content = fis.util.fs.readFileSync(log).toString('utf8').substring(lastIndex);
+                                lastIndex += content.length;
+                                if(content.indexOf('Started SelectChannelConnector@') > 0){
+                                    process.stdout.write(opt.port + '\n');
+                                    clearInterval(timer);
+                                } else if(content.indexOf('Exception:') > 0) {
+                                    var match = content.match(/exception:\s+([^\r\n:]+)/i);
+                                    var msg = 'server fails to start at port [' + opt.port + '], error: ';
+                                    if(match){
+                                        msg += match[1];
+                                    } else {
+                                        msg += 'unknown';
+                                    }
+                                    process.stdout.write('\n');
+                                    fis.log.error(msg);
+                                }
+                            }
+                        }, 200);
                     } else {
                         fis.log.error('unsupported php-cgi environment');
                     }
