@@ -13,6 +13,7 @@ WEB-INF/
 *.db
 *.bak
 *.tmp
+*.cmd
 ~*
 
 upload.py
