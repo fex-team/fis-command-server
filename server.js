@@ -196,7 +196,7 @@ exports.register = function(commander){
                                 process.stdout.write('\n');
                                 fis.log.error(errMsg + 'timeout');
                             }
-                        }, 200);
+                        }, 100);
                     } else {
                         fis.log.error('unsupported php-cgi environment');
                     }
