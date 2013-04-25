@@ -136,7 +136,6 @@ exports.register = function(commander){
                 });
                 php.on('exit', function(){
                     if(phpVersion){
-                        fis.log.debug('document root [' + opt.root + ']');
                         process.stdout.write('starting fis-server on port : ');
                         
                         var timeout = Math.max(opt.timeout * 1000, 5000);
@@ -172,7 +171,15 @@ exports.register = function(commander){
                                     if(content.indexOf('Started SelectChannelConnector@') > 0){
                                         clearInterval(timer);
                                         process.stdout.write(opt.port + '\n');
-                                        open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
+                                        if(opt.rewrite){
+                                            var script = fis.util(opt.root, opt.script || 'index.php');
+                                            if(!fis.util.exists(script)){
+                                                fis.util.copy(__dirname + '/index.php', script);
+                                            }
+                                        }
+                                        setTimeout(function(){
+                                            open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
+                                        }, 200);
                                     } else if(content.indexOf('Exception:') > 0) {
                                         clearInterval(timer);
                                         var match = content.match(/exception:\s+([^\r\n:]+)/i);
@@ -228,7 +235,7 @@ exports.register = function(commander){
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
         .option('--script <name>', 'rewrite entry file name', String)
-        .option('--timeout <seconds>', 'rewrite entry file name', parseInt, 10)
+        .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String)
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
