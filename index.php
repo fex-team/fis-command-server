@@ -13,7 +13,7 @@
         padding-bottom: 1px;
     }
     .c1 {
-        color: #c90;
+        color: #c00;
     }
     .c2 {
         color: #03c;
@@ -67,7 +67,7 @@
                         -BBBB.                         
                         (BBBB-                         
                         =BBBB=                         
-                        DBBBBh       Forward request [ <em class="c1"><?php echo $_SERVER['REQUEST_URI'];?></em> ] to file [ <em class="c2"><?php echo __FILE__;?></em> ].
+                        DBBBBh       Forward request <em class="c1">" <?php echo $_SERVER['REQUEST_URI'];?> "</em> to file [ <em class="c2"><?php echo __FILE__;?></em> ].
                        'BBBBBB'                        
                        sBBBBBB=               
                       .DBBBBBBD                        
