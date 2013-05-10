@@ -269,7 +269,7 @@ exports.register = function(commander){
                         var remote = fis.config.get(
                             'system.repos', fis.project.DEFAULT_REMOTE_REPOS
                         ).replace(/\/$/, '');
-                        var url = remote + '/' + name + '/' + version + '.tar';
+                        var url = remote + '/server/' + name + '/' + version + '.tar';
                         process.stdout.write('download module [' + name + '@' + version + '] ... ');
                         fis.util.download(url, function(err){
                             if(err){
