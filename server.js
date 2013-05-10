@@ -231,6 +231,29 @@ exports.register = function(commander){
         }
     }
     
+    function install(name, version, extract, remote){
+        version = version === '*' ? 'latest' : ( version || 'latest' );
+        var url = remote + '/server/' + name + '/' + version + '.tar';
+        process.stdout.write('download module [' + name + '@' + version + '] ... ');
+        fis.util.download(url, function(err){
+            if(err){
+                process.stdout.write('fail\n');
+                fis.log.error( 'unable to download module [' +
+                    name + '@' + version + '] from [' + url + '], error [' + err + ']');
+            } else {
+                process.stdout.write('ok\n');
+                var pkg = fis.util(extract, 'package.json');
+                if(fis.util.isFile(pkg)){
+                    var info = fis.util.readJSON(pkg);
+                    fis.util.fs.unlinkSync(pkg);
+                    fis.util.map(info.dependencies || {}, function(name, version){
+                        install(name, version, extract, remote);
+                    });
+                }
+            }
+        }, extract);
+    }
+    
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
@@ -263,23 +286,11 @@ exports.register = function(commander){
                     var name = options;
                     options = arguments[2];
                     if(typeof name === 'string'){
-                        name = name.split('@');
-                        var version = name[1] || 'latest';
-                        name = name[0];
                         var remote = fis.config.get(
                             'system.repos', fis.project.DEFAULT_REMOTE_REPOS
                         ).replace(/\/$/, '');
-                        var url = remote + '/server/' + name + '/' + version + '.tar';
-                        process.stdout.write('download module [' + name + '@' + version + '] ... ');
-                        fis.util.download(url, function(err){
-                            if(err){
-                                process.stdout.write('fail\n');
-                                fis.log.error( 'unable to download module [' +
-                                    name + '@' + version + '] from [' + url + '], error [' + err + ']');
-                            } else {
-                                process.stdout.write('ok\n');
-                            }
-                        }, options['root']);
+                        name = name.split('@');
+                        install(name[0], name[1], options['root'], remote);
                     } else {
                         fis.log.error('invalid framework name');
                     }
