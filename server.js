@@ -264,6 +264,7 @@ exports.register = function(commander){
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
         .option('--no-rewrite', 'disable rewrite feature', Boolean)
+        .option('--repos <url>', 'install repository', String)
         .action(function(cmd, options){
             var conf = getConf();
             switch (cmd){
@@ -286,11 +287,14 @@ exports.register = function(commander){
                     var name = options;
                     options = arguments[2];
                     if(typeof name === 'string'){
-                        var remote = fis.config.get(
+                        var remote = options.repos || fis.config.get(
                             'system.repos', fis.project.DEFAULT_REMOTE_REPOS
-                        ).replace(/\/$/, '');
+                        ).replace(/\/$/, '') + '/server';
                         name = name.split('@');
-                        install(name[0], name[1], options['root'], remote);
+                        fis.util.install(name[0], name[1], {
+                            extract : options['root'],
+                            remote : remote
+                        });
                     } else {
                         fis.log.error('invalid framework name');
                     }
