@@ -47,7 +47,7 @@ exports.register = function(commander){
                         var iMatch = item.match(/\d+/);
                         var index = match[1].toLowerCase();
                         if(iMatch && iMatch[0] == pid[names[index]]){
-                            process.kill(iMatch[0]);
+                            process.kill(iMatch[0], 'SIGKILL');
                         }
                     }
                 });
