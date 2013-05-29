@@ -284,19 +284,22 @@ exports.register = function(commander){
                     stop(start);
                     break;
                 case 'install':
-                    var name = options;
+                    var names = options;
                     options = arguments[2];
-                    if(typeof name === 'string'){
+                    if(typeof names === 'string'){
                         var remote = options.repos || fis.config.get(
                             'system.repos', fis.project.DEFAULT_REMOTE_REPOS
                         ).replace(/\/$/, '') + '/server';
-                        name = name.split('@');
-                        fis.util.install(name[0], name[1], {
+                        var option = {
                             extract : options['root'],
                             remote : remote
+                        };
+                        names.split(',').forEach(function(name){
+                            name = name.split('@');
+                            fis.util.install(name[0], name[1], option);
                         });
                     } else {
-                        fis.log.error('invalid framework name');
+                        fis.log.error('invalid server component name');
                     }
                     break;
                 case 'info':
