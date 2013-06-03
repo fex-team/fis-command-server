@@ -74,8 +74,13 @@ exports.register = function(commander){
     }
     
     function open(path){
-        var cmd = fis.util.isWin() ? 'start' : 'open';
-        child_process.exec(cmd + ' ' + fis.util.escapeShellArg(path));
+        var cmd = fis.util.escapeShellArg(path);
+        if(fis.util.isWin()){
+            cmd = 'start "" ' + cmd;
+        } else {
+            cmd = 'open ' + cmd;
+        }
+        child_process.exec(cmd);
     }
     
     function start(opt){
