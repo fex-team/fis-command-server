@@ -147,7 +147,7 @@ exports.register = function(commander){
                         delete opt.timeout;
                         
                         var cmd = [
-                            fis.util.escapeShellArg(process.execPath),
+                            fis.util.escapeShellCmd(process.execPath),
                             fis.util.escapeShellArg(fis.util(__dirname, 'child.js'))
                         ].join(' ');
                         fis.util.map(opt, function(key, value){
