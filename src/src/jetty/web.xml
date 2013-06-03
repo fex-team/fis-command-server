@@ -26,7 +26,7 @@
 >
 
   <description>
-    Default web.xml file.  
+    Default web.xml file.
     This file is applied to a Web application before it's own WEB_INF/web.xml file
   </description>
 
@@ -227,6 +227,7 @@
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
     <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.php</welcome-file>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 

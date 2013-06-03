@@ -1,4 +1,5 @@
 /.idea
+/.metadata
 node_modules/
 
 /log.txt
