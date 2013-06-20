@@ -270,7 +270,10 @@ exports.register = function(commander){
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
         .option('--no-rewrite', 'disable rewrite feature', Boolean)
         .option('--repos <url>', 'install repository', String)
-        .action(function(cmd, options){
+        .action(function(){
+            var args = Array.prototype.slice.call(arguments);
+            var options = args.pop();
+            var cmd = args.shift();
             var conf = getConf();
             switch (cmd){
                 case 'start':
@@ -289,8 +292,7 @@ exports.register = function(commander){
                     stop(start);
                     break;
                 case 'install':
-                    var names = options;
-                    options = arguments[2];
+                    var names = args.shift();
                     if(typeof names === 'string'){
                         var remote = options.repos || fis.config.get(
                             'system.repos', fis.project.DEFAULT_REMOTE_REPOS
