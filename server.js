@@ -325,6 +325,13 @@ exports.register = function(commander){
                         }
                     }
                     break;
+                case 'clean':
+                    process.stdout.write('\n δ'.bold.yellow);
+                    var now = Date.now();
+                    fis.util.del(options['root'], null, /\/WEB-INF\//);
+                    process.stdout.write((Date.now() - now + 'ms').green.bold);
+                    process.stdout.write('\n');
+                    break;
                 default :
                     commander.help();
             }
@@ -349,6 +356,10 @@ exports.register = function(commander){
     commander
         .command('open')
         .description('open document root directory');
+    
+    commander
+        .command('clean')
+        .description('delete all files in document root');
     
     commander
         .command('install <name>')
