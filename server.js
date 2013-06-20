@@ -326,7 +326,7 @@ exports.register = function(commander){
                     }
                     break;
                 case 'clean':
-                    process.stdout.write('\n δ'.bold.yellow);
+                    process.stdout.write(' δ'.bold.yellow);
                     var now = Date.now();
                     fis.util.del(options['root'], null, /\/WEB-INF\//);
                     process.stdout.write((Date.now() - now + 'ms').green.bold);
