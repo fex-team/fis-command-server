@@ -359,7 +359,7 @@ exports.register = function(commander){
     
     commander
         .command('clean')
-        .description('delete all files in document root');
+        .description('clean files in document root');
     
     commander
         .command('install <name>')
