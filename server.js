@@ -12,6 +12,27 @@ exports.register = function(commander){
     
     var child_process = require('child_process');
     var spawn = child_process.spawn;
+    var tmp_dir = (function(){
+        var list = ['LOCALAPPDATA', 'APPDATA', 'HOME'], tmp;
+        for(var i = 0, len = list.length; i < len; i++){
+            if(tmp = process.env[list[i]]){
+                break;
+            }
+        }
+        if(tmp){
+            tmp += '/.fis-tmp/server';
+            if(!fis.util.exists(tmp)){
+                fis.util.mkdir(tmp);
+            }
+        } else {
+            tmp = __dirname;
+        }
+        if(fis.util.isDir(tmp)){
+            return fis.util.realpath(tmp);
+        } else {
+            fis.log.error('invalid temp directory [' + tmp + ']');
+        }
+    })();
     
     function getConf(){
         return fis.project.getTempPath('server/conf.json');
@@ -19,11 +40,11 @@ exports.register = function(commander){
     
     function stop(callback){
         //del log file
-        var log = fis.util(__dirname, 'log.txt');
+        var log = tmp_dir + '/log.txt';
         if(fis.util.exists(log)){
             fis.util.fs.unlinkSync(log);
         }
-        var tmp = fis.util(__dirname, 'pid');
+        var tmp = tmp_dir + '/pid';
         if(fis.util.exists(tmp)){
             var pid = fis.util.fs.readFileSync(tmp, 'utf8').trim().split(/\s*,\s*/);
             var list, msg = '';
@@ -158,7 +179,7 @@ exports.register = function(commander){
                         });
                         
                         //watch log
-                        var log = fis.util(__dirname, '/log.txt');
+                        var log = tmp_dir + '/log.txt';
                         fis.util.write(log, '');
                         var lastModified = fis.util.mtime(log).getTime();
                         var startTime = (new Date).getTime();
