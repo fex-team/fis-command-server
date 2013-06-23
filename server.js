@@ -69,6 +69,7 @@ exports.register = function(commander){
                         var index = match[1].toLowerCase();
                         if(iMatch && iMatch[0] == pid[names[index]]){
                             process.kill(iMatch[0], 'SIGKILL');
+                            process.stdout.write('shutdown ' + index + ' process [' + iMatch[0] + ']\n');
                         }
                     }
                 });
@@ -136,7 +137,7 @@ exports.register = function(commander){
             if(!javaVersion){
                 javaVersion = matchVersion(data.toString('utf8'));
                 if(javaVersion){
-                    process.stdout.write('version ' + javaVersion + '\n');
+                    process.stdout.write('v' + javaVersion + '\n');
                 }
             }
         });
@@ -153,7 +154,7 @@ exports.register = function(commander){
                     if(!phpVersion){
                         phpVersion = matchVersion(data.toString('utf8'));
                         if(phpVersion){
-                            process.stdout.write('version ' + phpVersion + '\n');
+                            process.stdout.write('v' + phpVersion + '\n');
                         }
                     }
                 });
@@ -162,8 +163,7 @@ exports.register = function(commander){
                 });
                 php.on('exit', function(){
                     if(phpVersion){
-                        process.stdout.write('starting fis-server on port : ');
-                        
+                        process.stdout.write('starting fis-server .');
                         var timeout = Math.max(opt.timeout * 1000, 5000);
                         delete opt.timeout;
                         
@@ -184,7 +184,7 @@ exports.register = function(commander){
                         var lastModified = fis.util.mtime(log).getTime();
                         var startTime = (new Date).getTime();
                         var lastIndex = 0;
-                        var errMsg = 'server fails to start at port [' + opt.port + '], error: ';
+                        var errMsg = 'fis-server fails to start at port [' + opt.port + '], error: ';
                         fis.log.debug('start command : ' + cmd);
                         fis.util.nohup(cmd, { cwd : __dirname });
                         var timer = setInterval(function(){
@@ -194,9 +194,10 @@ exports.register = function(commander){
                                     lastModified = mtime;
                                     var content = fis.util.fs.readFileSync(log).toString('utf8').substring(lastIndex);
                                     lastIndex += content.length;
+                                    process.stdout.write('.');
                                     if(content.indexOf('Started SelectChannelConnector@') > 0){
                                         clearInterval(timer);
-                                        process.stdout.write(opt.port + '\n');
+                                        process.stdout.write(' at port [' + opt.port + ']\n');
                                         if(opt.rewrite){
                                             var script = fis.util(opt.root, opt.script || 'index.php');
                                             if(!fis.util.exists(script)){
@@ -214,17 +215,17 @@ exports.register = function(commander){
                                         } else {
                                             errMsg += 'unknown';
                                         }
-                                        process.stdout.write('\n');
+                                        process.stdout.write(' fail\n');
                                         fis.log.error(errMsg);
                                     }
                                 }
                             } else {
-                                process.stdout.write('\n');
+                                process.stdout.write(' fail\n');
                                 fis.log.error(errMsg + 'timeout');
                             }
                         }, 100);
                     } else {
-                        fis.log.error('unsupported php-cgi environment');
+                        fis.log.error('unsupported php-cgi environment, using "--php_exec path/to/php-cgi" option to fix it.');
                     }
                 });
             } else {
