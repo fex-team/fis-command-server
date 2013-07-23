@@ -47,7 +47,7 @@ exports.register = function(commander){
             if(isWin){
                 list = spawn('tasklist');
             } else {
-                list = spawn('ps');
+                list = spawn('ps', [ '-A' ]);
             }
             list.stdout.on('data', function(chunk){
                 msg += chunk.toString('utf8').toLowerCase();
