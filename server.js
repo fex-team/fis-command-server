@@ -39,14 +39,9 @@ exports.register = function(commander){
     }
     
     function stop(callback){
-        //del log file
-        var log = tmp_dir + '/log.txt';
-        if(fis.util.exists(log)){
-            fis.util.fs.unlinkSync(log);
-        }
         var tmp = tmp_dir + '/pid';
         if(fis.util.exists(tmp)){
-            var pid = fis.util.fs.readFileSync(tmp, 'utf8').trim().split(/\s*,\s*/);
+            var pid = fis.util.fs.readFileSync(tmp, 'utf8').trim();
             var list, msg = '';
             var isWin = fis.util.isWin();
             if(isWin){
@@ -58,18 +53,12 @@ exports.register = function(commander){
                 msg += chunk.toString('utf8').toLowerCase();
             });
             list.on('exit', function(){
-                var names = {
-                    'node' : 0,
-                    'java' : 1
-                };
                 msg.split(/[\r\n]+/).forEach(function(item){
-                    var match = item.match(/\b(node|java)\b/i);
-                    if(match){
+                    if(/\bjava\b/i.test(item)){
                         var iMatch = item.match(/\d+/);
-                        var index = match[1].toLowerCase();
-                        if(iMatch && iMatch[0] == pid[names[index]]){
-                            process.kill(iMatch[0], 'SIGKILL');
-                            process.stdout.write('shutdown ' + index + ' process [' + iMatch[0] + ']\n');
+                        if(iMatch && iMatch[0] == pid){
+                            process.kill(pid, 'SIGKILL');
+                            process.stdout.write('shutdown java process [' + iMatch[0] + ']\n');
                         }
                     }
                 });
@@ -95,14 +84,14 @@ exports.register = function(commander){
         return version;
     }
     
-    function open(path){
+    function open(path, callback){
         var cmd = fis.util.escapeShellArg(path);
         if(fis.util.isWin()){
             cmd = 'start "" ' + cmd;
         } else {
             cmd = 'open ' + cmd;
         }
-        child_process.exec(cmd);
+        child_process.exec(cmd, callback);
     }
     
     function start(opt){
@@ -164,66 +153,41 @@ exports.register = function(commander){
                 php.on('exit', function(){
                     if(phpVersion){
                         process.stdout.write('starting fis-server .');
-                        var timeout = Math.max(opt.timeout * 1000, 5000);
-                        delete opt.timeout;
-                        
-                        var cmd = [
-                            fis.util.escapeShellCmd(process.execPath),
-                            fis.util.escapeShellArg(fis.util(__dirname, 'child.js'))
-                        ].join(' ');
-                        fis.util.map(opt, function(key, value){
-                            if(typeof value === 'string'){
-                                value = fis.util.escapeShellArg(value);
-                            }
-                            cmd += ' --' + key + ' ' + value;
-                        });
-                        
-                        //watch log
-                        var log = tmp_dir + '/log.txt';
-                        fis.util.write(log, '');
-                        var lastModified = fis.util.mtime(log).getTime();
-                        var startTime = (new Date).getTime();
-                        var lastIndex = 0;
+                        var timeout = Math.max(opt.timeout * 1000, 5000); delete opt.timeout;
                         var errMsg = 'fis-server fails to start at port [' + opt.port + '], error: ';
-                        fis.log.debug('start command : ' + cmd);
-                        fis.util.nohup(cmd, { cwd : __dirname });
-                        var timer = setInterval(function(){
-                            if((new Date).getTime() - startTime < timeout){
-                                var mtime = fis.util.mtime(log).getTime();
-                                if(lastModified !== mtime){
-                                    lastModified = mtime;
-                                    var content = fis.util.fs.readFileSync(log).toString('utf8').substring(lastIndex);
-                                    lastIndex += content.length;
-                                    process.stdout.write('.');
-                                    if(content.indexOf('Started SelectChannelConnector@') > 0){
-                                        clearInterval(timer);
-                                        process.stdout.write(' at port [' + opt.port + ']\n');
-                                        if(opt.rewrite){
-                                            var script = fis.util(opt.root, opt.script || 'index.php');
-                                            if(!fis.util.exists(script)){
-                                                fis.util.copy(__dirname + '/index.php', script);
-                                            }
-                                        }
-                                        setTimeout(function(){
-                                            open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
-                                        }, 200);
-                                    } else if(content.indexOf('Exception:') > 0) {
-                                        clearInterval(timer);
-                                        var match = content.match(/exception:\s+([^\r\n:]+)/i);
-                                        if(match){
-                                            errMsg += match[1];
-                                        } else {
-                                            errMsg += 'unknown';
-                                        }
-                                        process.stdout.write(' fail\n');
-                                        fis.log.error(errMsg);
-                                    }
-                                }
-                            } else {
+                        var args = ['-jar', 'client/client.jar'];
+                        fis.util.map(opt, function(key, value){
+                            args.push('--' + key, String(value));
+                        });
+                        var server = spawn('java', args, { cwd : __dirname, detached: true });
+                        server.stderr.on('data', function(chunk){
+                            chunk = chunk.toString('utf8');
+                            process.stdout.write('.');
+                            if(chunk.indexOf('Started SelectChannelConnector@') > 0){
+                                process.stdout.write(' at port [' + opt.port + ']\n');
+                                setTimeout(function(){
+                                    open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                                        process.exit(0);
+                                    });
+                                }, 200);
+                            } else if(chunk.indexOf('Exception:') > 0) {
                                 process.stdout.write(' fail\n');
-                                fis.log.error(errMsg + 'timeout');
+                                var match = chunk.match(/exception:\s+([^\r\n:]+)/i);
+                                if(match){
+                                    errMsg += match[1];
+                                } else {
+                                    errMsg += 'unknown';
+                                }
+                                fis.log.error(errMsg);
                             }
-                        }, 100);
+                        });
+                        server.on('error', fis.log.error);
+                        server.unref();
+                        fis.util.write(tmp_dir + '/pid', server.pid);
+                        setTimeout(function(){
+                            process.stdout.write(' fail\n');
+                            fis.log.error(errMsg + 'timeout');
+                        }, timeout);
                     } else {
                         fis.log.error('unsupported php-cgi environment, using "--php_exec path/to/php-cgi" option to fix it.');
                     }
