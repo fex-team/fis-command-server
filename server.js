@@ -156,15 +156,24 @@ exports.register = function(commander){
                         var timeout = Math.max(opt.timeout * 1000, 5000); delete opt.timeout;
                         var errMsg = 'fis-server fails to start at port [' + opt.port + '], error: ';
                         var args = ['-jar', 'client/client.jar'];
+                        var ready = false;
                         fis.util.map(opt, function(key, value){
                             args.push('--' + key, String(value));
                         });
                         var server = spawn('java', args, { cwd : __dirname, detached: true });
                         server.stderr.on('data', function(chunk){
+                            if(ready) return;
                             chunk = chunk.toString('utf8');
                             process.stdout.write('.');
                             if(chunk.indexOf('Started SelectChannelConnector@') > 0){
+                                ready = true;
                                 process.stdout.write(' at port [' + opt.port + ']\n');
+                                if(opt.rewrite){
+                                    var script = fis.util(opt.root, opt.script || 'index.php');
+                                    if(!fis.util.exists(script)){
+                                        fis.util.copy(__dirname + '/index.php', script);
+                                    }
+                                }
                                 setTimeout(function(){
                                     open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
                                         process.exit(0);
