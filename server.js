@@ -181,6 +181,7 @@ exports.register = function(commander){
                                 }, 200);
                             } else if(chunk.indexOf('Exception:') > 0) {
                                 process.stdout.write(' fail\n');
+                                try { process.kill(server.pid, 'SIGKILL'); } catch(e){}
                                 var match = chunk.match(/exception:\s+([^\r\n:]+)/i);
                                 if(match){
                                     errMsg += match[1];
@@ -190,7 +191,10 @@ exports.register = function(commander){
                                 fis.log.error(errMsg);
                             }
                         });
-                        server.on('error', fis.log.error);
+                        server.on('error', function(err){
+                            try { process.kill(server.pid, 'SIGKILL'); } catch(e){}
+                            fis.log.error(err);
+                        });
                         server.unref();
                         fis.util.write(tmp_dir + '/pid', server.pid);
                         setTimeout(function(){
