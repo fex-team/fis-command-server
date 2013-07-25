@@ -135,18 +135,20 @@ exports.register = function(commander){
         });
         java.on('exit', function(){
             if(javaVersion){
-                //check php-cgi
-                process.stdout.write('checking php-cgi support : ');
-                var php = spawn(opt['php_exec'] ? opt['php_exec'] : 'php-cgi', ['-v']);
-                var phpVersion = false;
-                php.stdout.on('data', function(data){
+                var check = function(data){
                     if(!phpVersion){
                         phpVersion = matchVersion(data.toString('utf8'));
                         if(phpVersion){
                             process.stdout.write('v' + phpVersion + '\n');
                         }
                     }
-                });
+                };
+                //check php-cgi
+                process.stdout.write('checking php-cgi support : ');
+                var php = spawn(opt['php_exec'] ? opt['php_exec'] : 'php-cgi', ['--version']);
+                var phpVersion = false;
+                php.stdout.on('data', check);
+                php.stderr.on('data', check);
                 php.on('error', function(err){
                     fis.log.error(err);
                 });
