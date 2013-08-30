@@ -85,6 +85,7 @@ exports.register = function(commander){
     }
     
     function open(path, callback){
+        process.stdout.write('browse ' + path.yellow.bold + '\n');
         var cmd = fis.util.escapeShellArg(path);
         if(fis.util.isWin()){
             cmd = 'start "" ' + cmd;
@@ -97,14 +98,7 @@ exports.register = function(commander){
                 cmd = 'open ' + cmd;
             }
         }
-        child_process.exec(cmd, function(err){
-            if(err){
-                fis.log.notice('see [' + path + ']');
-            } else if(typeof err === 'function') {
-                callback();
-            }
-            process.exit();
-        });
+        child_process.exec(cmd, callback);
     }
     
     function start(opt){
@@ -190,7 +184,9 @@ exports.register = function(commander){
                                     }
                                 }
                                 setTimeout(function(){
-                                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
+                                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                                        process.exit();
+                                    });
                                 }, 200);
                             } else if(chunk.indexOf('Exception:') > 0) {
                                 process.stdout.write(' fail\n');
