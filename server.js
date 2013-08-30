@@ -89,9 +89,21 @@ exports.register = function(commander){
         if(fis.util.isWin()){
             cmd = 'start "" ' + cmd;
         } else {
-            cmd = 'open ' + cmd;
+            if(process.env['XDG_SESSION_COOKIE']){
+                cmd = 'xdg-open ' + cmd;
+            } else if(process.env['GNOME_DESKTOP_SESSION_ID']){
+                cmd = 'gnome-open ' + cmd;
+            } else {
+                cmd = 'open ' + cmd;
+            }
         }
-        child_process.exec(cmd, callback);
+        child_process.exec(cmd, function(err){
+            if(err){
+                fis.log.notice('see directory [' + path + ']');
+            } else {
+                callback();
+            }
+        });
     }
     
     function start(opt){
