@@ -99,7 +99,7 @@ exports.register = function(commander){
         }
         child_process.exec(cmd, function(err){
             if(err){
-                fis.log.notice('see directory [' + path + ']');
+                fis.log.notice('see [' + path + ']');
             } else if(typeof err === 'function') {
                 callback();
             }
