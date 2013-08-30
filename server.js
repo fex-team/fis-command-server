@@ -177,7 +177,7 @@ exports.register = function(commander){
                                     }
                                 }
                                 setTimeout(function(){
-                                    open('http://localhost' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
                                         process.exit(0);
                                     });
                                 }, 200);
