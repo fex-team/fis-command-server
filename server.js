@@ -100,6 +100,7 @@ exports.register = function(commander){
         child_process.exec(cmd, function(err){
             if(err){
                 fis.log.notice('see [' + path + ']');
+                process.exit();
             } else if(typeof err === 'function') {
                 callback();
             }
