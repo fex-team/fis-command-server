@@ -100,10 +100,10 @@ exports.register = function(commander){
         child_process.exec(cmd, function(err){
             if(err){
                 fis.log.notice('see [' + path + ']');
-                process.exit();
             } else if(typeof err === 'function') {
                 callback();
             }
+            process.exit();
         });
     }
     
@@ -190,9 +190,7 @@ exports.register = function(commander){
                                     }
                                 }
                                 setTimeout(function(){
-                                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
-                                        process.exit(0);
-                                    });
+                                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'));
                                 }, 200);
                             } else if(chunk.indexOf('Exception:') > 0) {
                                 process.stdout.write(' fail\n');
