@@ -61,6 +61,8 @@ public class HttpServer {
 		} else {
 			context = new WebAppContext(root, "/");
 		}
+		String descriptor = Thread.currentThread().getClass().getResource("/jetty/web.xml").toString();
+		context.setDefaultsDescriptor(descriptor);
 		if(hasCGI){
 			Iterator<Entry<String, String>> iter = map.entrySet().iterator();
 			while(iter.hasNext()){
@@ -69,11 +71,9 @@ public class HttpServer {
 				String value = entry.getValue();
 				System.setProperty("php.java.bridge." + key, value);
 			}
-			String descriptor = Thread.currentThread().getClass().getResource("/jetty/web.xml").toString();
-			context.setDefaultsDescriptor(descriptor);
 			context.addServlet(FastCGIServlet.class, "*.php");
-			context.addEventListener(new ContextLoaderListener());
 		}
+		context.addEventListener(new ContextLoaderListener());
 		hc.addHandler(context);
 		Server server = new Server(port);
 		server.setHandler(hc);

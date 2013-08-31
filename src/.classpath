@@ -5,15 +5,15 @@
 	<classpathentry kind="lib" path="lib/JavaBridge.jar"/>
 	<classpathentry kind="lib" path="lib/php-servlet.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-3.0.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-continuation-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-http-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-io-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-security-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-server-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlet-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-webapp-8.1.10.v20130312.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-xml-8.1.10.v20130312.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-8.1.12.v20130726.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
