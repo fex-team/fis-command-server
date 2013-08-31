@@ -113,6 +113,7 @@ exports.register = function(commander){
         });
         var server = spawn('java', args, { cwd : __dirname, detached: true });
         server.stderr.on('data', function(chunk){
+            //console.log(chunk.toString('utf8'));
             if(ready) return;
             chunk = chunk.toString('utf8');
             log += chunk;
