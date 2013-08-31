@@ -207,13 +207,14 @@ exports.register = function(commander){
                     }
                 };
                 //check php-cgi
-                process.stdout.write('checking php-cgi support : ');
+                process.stdout.write('checking FastCGI support : ');
                 var php = spawn(opt.php_exec, ['--version']);
                 var phpVersion = false;
                 php.stdout.on('data', check);
                 php.stderr.on('data', check);
                 php.on('error', function(){
-                    fis.log.warning('unsupported php-cgi environment, launch a static resource server instead.');
+                    process.stdout.write('unsupported FastCGI environment\n');
+                    fis.log.notice('launching static resource server.');
                     delete opt.php_exec;
                     launchClient(opt);
                 });
@@ -221,7 +222,7 @@ exports.register = function(commander){
                     if(phpVersion){
                         launchClient(opt);
                     } else {
-                        fis.log.error('unable to launch php-cgi, using "--php_exec path/to/php-cgi" option to fix it.');
+                        fis.log.error('unable to get version info of [' + opt.php_exec + ']');
                     }
                 });
             } else {
