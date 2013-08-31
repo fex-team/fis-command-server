@@ -101,6 +101,62 @@ exports.register = function(commander){
         child_process.exec(cmd, callback);
     }
     
+    function launchClient(opt){
+        process.stdout.write('starting fis-server .');
+        var timeout = Math.max(opt.timeout * 1000, 5000); delete opt.timeout;
+        var errMsg = 'fis-server fails to start at port [' + opt.port + '], error: ';
+        var args = ['-jar', 'client/client.jar'];
+        var ready = false;
+        var log = '';
+        fis.util.map(opt, function(key, value){
+            args.push('--' + key, String(value));
+        });
+        var server = spawn('java', args, { cwd : __dirname, detached: true });
+        server.stderr.on('data', function(chunk){
+            if(ready) return;
+            chunk = chunk.toString('utf8');
+            log += chunk;
+            process.stdout.write('.');
+            if(chunk.indexOf('Started SelectChannelConnector@') > 0){
+                ready = true;
+                process.stdout.write(' at port [' + opt.port + ']\n');
+                if(opt.rewrite){
+                    var script = fis.util(opt.root, opt.script || 'index.php');
+                    if(!fis.util.exists(script)){
+                        fis.util.copy(__dirname + '/index.php', script);
+                    }
+                }
+                setTimeout(function(){
+                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
+                        process.exit();
+                    });
+                }, 200);
+            } else if(chunk.indexOf('Exception') > 0) {
+                process.stdout.write(' fail\n');
+                try { process.kill(server.pid, 'SIGKILL'); } catch(e){}
+                var match = chunk.match(/exception:?\s+([^\r\n]+)/i);
+                if(match){
+                    errMsg += match[1];
+                } else {
+                    errMsg += 'unknown';
+                }
+                console.log(log);
+                fis.log.error(errMsg);
+            }
+        });
+        server.on('error', function(err){
+            try { process.kill(server.pid, 'SIGKILL'); } catch(e){}
+            fis.log.error(err);
+        });
+        server.unref();
+        fis.util.write(tmp_dir + '/pid', server.pid);
+        setTimeout(function(){
+            process.stdout.write(' fail\n');
+            if(log) console.log(log);
+            fis.log.error(errMsg + 'timeout');
+        }, timeout);
+    }
+    
     function start(opt){
         var tmp = getConf();
         if(opt){
@@ -152,66 +208,20 @@ exports.register = function(commander){
                 };
                 //check php-cgi
                 process.stdout.write('checking php-cgi support : ');
-                var php = spawn(opt['php_exec'] ? opt['php_exec'] : 'php-cgi', ['--version']);
+                var php = spawn(opt.php_exec, ['--version']);
                 var phpVersion = false;
                 php.stdout.on('data', check);
                 php.stderr.on('data', check);
-                php.on('error', function(err){
-                    fis.log.error(err);
+                php.on('error', function(){
+                    fis.log.warning('unsupported php-cgi environment, launch a static resource server instead.');
+                    delete opt.php_exec;
+                    launchClient(opt);
                 });
                 php.on('exit', function(){
                     if(phpVersion){
-                        process.stdout.write('starting fis-server .');
-                        var timeout = Math.max(opt.timeout * 1000, 5000); delete opt.timeout;
-                        var errMsg = 'fis-server fails to start at port [' + opt.port + '], error: ';
-                        var args = ['-jar', 'client/client.jar'];
-                        var ready = false;
-                        fis.util.map(opt, function(key, value){
-                            args.push('--' + key, String(value));
-                        });
-                        var server = spawn('java', args, { cwd : __dirname, detached: true });
-                        server.stderr.on('data', function(chunk){
-                            if(ready) return;
-                            chunk = chunk.toString('utf8');
-                            process.stdout.write('.');
-                            if(chunk.indexOf('Started SelectChannelConnector@') > 0){
-                                ready = true;
-                                process.stdout.write(' at port [' + opt.port + ']\n');
-                                if(opt.rewrite){
-                                    var script = fis.util(opt.root, opt.script || 'index.php');
-                                    if(!fis.util.exists(script)){
-                                        fis.util.copy(__dirname + '/index.php', script);
-                                    }
-                                }
-                                setTimeout(function(){
-                                    open('http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/'), function(){
-                                        process.exit();
-                                    });
-                                }, 200);
-                            } else if(chunk.indexOf('Exception:') > 0) {
-                                process.stdout.write(' fail\n');
-                                try { process.kill(server.pid, 'SIGKILL'); } catch(e){}
-                                var match = chunk.match(/exception:\s+([^\r\n:]+)/i);
-                                if(match){
-                                    errMsg += match[1];
-                                } else {
-                                    errMsg += 'unknown';
-                                }
-                                fis.log.error(errMsg);
-                            }
-                        });
-                        server.on('error', function(err){
-                            try { process.kill(server.pid, 'SIGKILL'); } catch(e){}
-                            fis.log.error(err);
-                        });
-                        server.unref();
-                        fis.util.write(tmp_dir + '/pid', server.pid);
-                        setTimeout(function(){
-                            process.stdout.write(' fail\n');
-                            fis.log.error(errMsg + 'timeout');
-                        }, timeout);
+                        launchClient(opt);
                     } else {
-                        fis.log.error('unsupported php-cgi environment, using "--php_exec path/to/php-cgi" option to fix it.');
+                        fis.log.error('unable to launch php-cgi, using "--php_exec path/to/php-cgi" option to fix it.');
                     }
                 });
             } else {
@@ -272,7 +282,7 @@ exports.register = function(commander){
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
         .option('--script <name>', 'rewrite entry file name', String)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
-        .option('--php_exec <path>', 'path to php-cgi executable file', String)
+        .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)

@@ -53,27 +53,27 @@ public class HttpServer {
 	}
 
 	public HttpServer(int port, String script, boolean rewrite, String root, HashMap<String, String> map) {
-		
-		Iterator<Entry<String, String>> iter = map.entrySet().iterator();
-		
-		while(iter.hasNext()){
-			Entry<String, String> entry = iter.next();
-			String key = entry.getKey().toLowerCase();
-			String value = entry.getValue();
-			System.setProperty("php.java.bridge." + key, value);
-		}
-		
 		HandlerCollection hc = new HandlerCollection();
 		WebAppContext context;
-		if(rewrite){
+		boolean hasCGI = map.get("php_exec") != null;
+		if(hasCGI && rewrite){
 			context = new FISWebAppContext(root, "/" + script);
 		} else {
 			context = new WebAppContext(root, "/");
 		}
-		String descriptor = Thread.currentThread().getClass().getResource("/jetty/web.xml").toString();
-		context.setDefaultsDescriptor(descriptor);
-		context.addServlet(FastCGIServlet.class, "*.php");
-		context.addEventListener(new ContextLoaderListener());
+		if(hasCGI){
+			Iterator<Entry<String, String>> iter = map.entrySet().iterator();
+			while(iter.hasNext()){
+				Entry<String, String> entry = iter.next();
+				String key = entry.getKey().toLowerCase();
+				String value = entry.getValue();
+				System.setProperty("php.java.bridge." + key, value);
+			}
+			String descriptor = Thread.currentThread().getClass().getResource("/jetty/web.xml").toString();
+			context.setDefaultsDescriptor(descriptor);
+			context.addServlet(FastCGIServlet.class, "*.php");
+			context.addEventListener(new ContextLoaderListener());
+		}
 		hc.addHandler(context);
 		Server server = new Server(port);
 		server.setHandler(hc);
