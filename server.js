@@ -85,7 +85,7 @@ exports.register = function(commander){
     }
     
     function open(path, callback){
-        process.stdout.write('browse ' + path.yellow.bold + '\n');
+        fis.log.notice('browse ' + path.yellow.bold + '\n');
         var cmd = fis.util.escapeShellArg(path);
         if(fis.util.isWin()){
             cmd = 'start "" ' + cmd;
