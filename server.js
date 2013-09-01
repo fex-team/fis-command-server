@@ -234,7 +234,10 @@ exports.register = function(commander){
                     if(phpVersion){
                         launchClient(opt);
                     } else {
-                        fis.log.error('unable to get version info of [' + opt.php_exec + ']');
+                        process.stdout.write('unable to get version info of [' + opt.php_exec + ']\n');
+                        fis.log.notice('launching java server.');
+                        delete opt.php_exec;
+                        launchClient(opt);
                     }
                 });
             } else {
