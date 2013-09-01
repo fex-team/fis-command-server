@@ -105,7 +105,18 @@ exports.register = function(commander){
         process.stdout.write('starting fis-server .');
         var timeout = Math.max(opt.timeout * 1000, 5000); delete opt.timeout;
         var errMsg = 'fis-server fails to start at port [' + opt.port + '], error: ';
-        var args = ['-jar', 'client/client.jar'];
+        var args = [
+            '-Dorg.apache.jasper.compiler.disablejsr199=true',
+            //'-Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.PollSelectorProvider',
+            '-jar', 'client/client.jar'
+        ];
+        if(opt.rewrite && !opt.script){
+            if(opt.php_exec){
+                opt.script = 'index.php';
+            } else {
+                opt.script = 'index.jsp';
+            }
+        }
         var ready = false;
         var log = '';
         fis.util.map(opt, function(key, value){
@@ -122,9 +133,9 @@ exports.register = function(commander){
                 ready = true;
                 process.stdout.write(' at port [' + opt.port + ']\n');
                 if(opt.rewrite){
-                    var script = fis.util(opt.root, opt.script || 'index.php');
+                    var script = fis.util(opt.root, opt.script);
                     if(!fis.util.exists(script)){
-                        fis.util.copy(__dirname + '/index.php', script);
+                        fis.util.copy(__dirname + '/' + opt.script, script);
                     }
                 }
                 setTimeout(function(){
@@ -282,7 +293,7 @@ exports.register = function(commander){
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
-        .option('--script <name>', 'rewrite entry file name', String)
+        .option('--script <name>', 'rewrite entry file name', String, 'index.php')
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
         .option('--php_exec_args <args>', 'php-cgi arguments', String)

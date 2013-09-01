@@ -53,6 +53,7 @@ public class HttpServer {
 	}
 
 	public HttpServer(int port, String script, boolean rewrite, String root, HashMap<String, String> map) {
+		
 		//context
 		HandlerCollection hc = new HandlerCollection();
 		WebAppContext context;

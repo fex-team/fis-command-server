@@ -15,5 +15,12 @@
 	<classpathentry kind="lib" path="lib/jetty-util-8.1.12.v20130726.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-webapp-8.1.12.v20130726.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-xml-8.1.12.v20130726.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/com.sun.el-2.2.0.v201108011116.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/javax.el-2.2.0.v201108011116.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/javax.servlet.jsp-2.2.0.v201112011158.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/org.apache.jasper.glassfish-2.2.2.v201112011158.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/org.eclipse.jdt.core-3.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
