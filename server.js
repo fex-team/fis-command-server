@@ -226,7 +226,7 @@ exports.register = function(commander){
                 php.stderr.on('data', check);
                 php.on('error', function(){
                     process.stdout.write('unsupported FastCGI environment\n');
-                    fis.log.notice('launching static resource server.');
+                    fis.log.notice('launching java server.');
                     delete opt.php_exec;
                     launchClient(opt);
                 });
@@ -293,7 +293,7 @@ exports.register = function(commander){
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
-        .option('--script <name>', 'rewrite entry file name', String, 'index.php')
+        .option('--script <name>', 'rewrite entry file name', String)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
         .option('--php_exec_args <args>', 'php-cgi arguments', String)

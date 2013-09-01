@@ -58,7 +58,7 @@ public class HttpServer {
 		HandlerCollection hc = new HandlerCollection();
 		WebAppContext context;
 		boolean hasCGI = map.get("php_exec") != null;
-		if(hasCGI && rewrite){
+		if(rewrite){
 			context = new FISWebAppContext(root, "/" + script);
 		} else {
 			context = new WebAppContext(root, "/");

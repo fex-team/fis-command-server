@@ -67,7 +67,7 @@
                         -BBBB.                         
                         (BBBB-                         
                         =BBBB=                         
-                        DBBBBh       Forward request <em class="c1">" <%=request.getRequestURI()%> "</em> to file [ <em class="c2"><%=application.getRealPath(request.getRequestURI())%></em> ].
+                        DBBBBh       Forward request <em class="c1">" <%=request.getRequestURI()%> "</em> to file [ <em class="c2"><%=application.getRealPath("index.jsp")%></em> ].
                        'BBBBBB'                        
                        sBBBBBB=               
                       .DBBBBBBD                        
