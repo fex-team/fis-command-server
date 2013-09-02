@@ -132,6 +132,14 @@ exports.register = function(commander){
             if(chunk.indexOf('Started SelectChannelConnector@') > 0){
                 ready = true;
                 process.stdout.write(' at port [' + opt.port + ']\n');
+                
+                //copy fis ico
+                var favicon = fis.util(opt.root, 'favicon.ico');
+                if(!fis.util.exists(favicon)){
+                    fis.util.copy(__dirname + '/favicon.ico', favicon);
+                }
+                
+                //copy script
                 if(opt.rewrite){
                     var script = fis.util(opt.root, opt.script);
                     if(!fis.util.exists(script)){
@@ -219,13 +227,13 @@ exports.register = function(commander){
                     }
                 };
                 //check php-cgi
-                process.stdout.write('checking FastCGI support : ');
+                process.stdout.write('checking php-cgi support : ');
                 var php = spawn(opt.php_exec, ['--version']);
                 var phpVersion = false;
                 php.stdout.on('data', check);
                 php.stderr.on('data', check);
                 php.on('error', function(){
-                    process.stdout.write('unsupported FastCGI environment\n');
+                    process.stdout.write('unsupported php-cgi environment\n');
                     fis.log.notice('launching java server.');
                     delete opt.php_exec;
                     launchClient(opt);
