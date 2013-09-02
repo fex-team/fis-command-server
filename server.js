@@ -136,14 +136,14 @@ exports.register = function(commander){
                 //copy fis ico
                 var favicon = fis.util(opt.root, 'favicon.ico');
                 if(!fis.util.exists(favicon)){
-                    fis.util.copy(__dirname + '/favicon.ico', favicon);
+                    fis.util.copy(__dirname + '/vendor/favicon.ico', favicon);
                 }
                 
                 //copy script
                 if(opt.rewrite){
                     var script = fis.util(opt.root, opt.script);
                     if(!fis.util.exists(script)){
-                        fis.util.copy(__dirname + '/' + opt.script, script);
+                        fis.util.copy(__dirname + '/vendor/' + opt.script, script);
                     }
                 }
                 setTimeout(function(){
