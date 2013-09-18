@@ -304,14 +304,16 @@ exports.register = function(commander){
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
+        .option('--no-rewrite', 'disable rewrite feature', Boolean)
         .option('--script <name>', 'rewrite entry file name', String)
+        .option('--repos <url>', 'install repository', String)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
-        .option('--no-rewrite', 'disable rewrite feature', Boolean)
-        .option('--repos <url>', 'install repository', String)
+        .option('--include <glob>', 'clean include filter', String)
+        .option('--exclude <glob>', 'clean exclude filter', String)
         .action(function(){
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
@@ -370,7 +372,12 @@ exports.register = function(commander){
                 case 'clean':
                     process.stdout.write(' δ '.bold.yellow);
                     var now = Date.now();
-                    fis.util.del(options['root'], null, /\/WEB-INF\//);
+                    var root = options['root'];
+                    if(fis.util.isDir(root)){
+                        var include = options.include ? fis.util.glob(root + '/' + options.include) : null;
+                        var exclude = options.exclude ? fis.util.glob(root + '/' + options.exclude) : /\/WEB-INF\//;
+                        fis.util.del(root, include, exclude);
+                    }
                     process.stdout.write((Date.now() - now + 'ms').green.bold);
                     process.stdout.write('\n');
                     break;
