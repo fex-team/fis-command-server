@@ -12,34 +12,17 @@ exports.register = function(commander){
     
     var child_process = require('child_process');
     var spawn = child_process.spawn;
-    var tmp_dir = (function(){
-        var list = ['LOCALAPPDATA', 'APPDATA', 'HOME'], tmp;
-        for(var i = 0, len = list.length; i < len; i++){
-            if(tmp = process.env[list[i]]){
-                break;
-            }
-        }
-        if(tmp){
-            tmp += '/.fis-tmp/server';
-            if(!fis.util.exists(tmp)){
-                fis.util.mkdir(tmp);
-            }
-        } else {
-            tmp = __dirname;
-        }
-        if(fis.util.isDir(tmp)){
-            return fis.util.realpath(tmp);
-        } else {
-            fis.log.error('invalid temp directory [' + tmp + ']');
-        }
-    })();
     
-    function getConf(){
+    function getRCFile(){
         return fis.project.getTempPath('server/conf.json');
     }
     
+    function getPidFile(){
+        return fis.project.getTempPath('server/pid');
+    }
+    
     function stop(callback){
-        var tmp = tmp_dir + '/pid';
+        var tmp = getPidFile();
         if(fis.util.exists(tmp)){
             var pid = fis.util.fs.readFileSync(tmp, 'utf8').trim();
             var list, msg = '';
@@ -169,7 +152,7 @@ exports.register = function(commander){
             fis.log.error(err);
         });
         server.unref();
-        fis.util.write(tmp_dir + '/pid', server.pid);
+        fis.util.write(getPidFile(), server.pid);
         setTimeout(function(){
             process.stdout.write(' fail\n');
             if(log) console.log(log);
@@ -178,7 +161,7 @@ exports.register = function(commander){
     }
     
     function start(opt){
-        var tmp = getConf();
+        var tmp = getRCFile();
         if(opt){
             fis.util.write(tmp, JSON.stringify(opt));
         } else {
@@ -318,7 +301,7 @@ exports.register = function(commander){
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
             var cmd = args.shift();
-            var conf = getConf();
+            var conf = getRCFile();
             switch (cmd){
                 case 'start':
                     var opt = {};
