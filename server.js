@@ -172,18 +172,6 @@ exports.register = function(commander){
             }
         }
         
-        if(opt.root){
-            if(fis.util.exists(opt.root)){
-                if(!fis.util.isDir(opt.root)){
-                    fis.log.error('document root [' + opt.root + '] is not a directory');
-                }
-            } else {
-                fis.util.mkdir(opt.root);
-            }
-        } else {
-            fis.log.error('invalid document root');
-        }
-        
         //check java
         process.stdout.write('checking java support : ');
         var java = spawn('java', ['-version']);
@@ -284,9 +272,22 @@ exports.register = function(commander){
         }, extract);
     }
     
+    var serverRoot = (function(){
+        var key = 'FIS_SERVER_DOCUMENT_ROOT';
+        if(process.env && process.env[key]){
+            var path = process.env[key];
+            if(fis.util.exists(path) && !fis.util.isDir(path)){
+                fis.log.error('invalid environment variable [' + key + '] of document root [' + path + ']');
+            }
+            return path;
+        } else {
+            return fis.project.getTempPath('www');
+        }
+    })();
+    
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
-        .option('--root <path>', 'document root', getRoot, fis.project.getTempPath('www'))
+        .option('--root <path>', 'document root', getRoot, serverRoot)
         .option('--no-rewrite', 'disable rewrite feature', Boolean)
         .option('--script <name>', 'rewrite entry file name', String)
         .option('--repos <url>', 'install repository', String)
@@ -302,6 +303,18 @@ exports.register = function(commander){
             var options = args.pop();
             var cmd = args.shift();
             var conf = getRCFile();
+            var root = options.root;
+
+            if(root){
+                if(fis.util.exists(root) && !fis.util.isDir(root)){
+                    fis.log.error('invalid document root [' + root + ']');
+                } else {
+                    fis.util.mkdir(root);
+                }
+            } else {
+                fis.log.error('missing document root');
+            }
+            
             switch (cmd){
                 case 'start':
                     var opt = {};
@@ -350,17 +363,16 @@ exports.register = function(commander){
                         if(fis.util.isDir(conf.root)){
                             open(conf.root);
                         }
+                    } else {
+                        open(root);
                     }
                     break;
                 case 'clean':
                     process.stdout.write(' δ '.bold.yellow);
                     var now = Date.now();
-                    var root = options['root'];
-                    if(fis.util.isDir(root)){
-                        var include = options.include ? fis.util.glob(root + '/' + options.include) : null;
-                        var exclude = options.exclude ? fis.util.glob(root + '/' + options.exclude) : /\/WEB-INF\//;
-                        fis.util.del(root, include, exclude);
-                    }
+                    var include = options.include ? fis.util.glob(root + '/' + options.include) : null;
+                    var exclude = options.exclude ? fis.util.glob(root + '/' + options.exclude) : /\/WEB-INF\//;
+                    fis.util.del(root, include, exclude);
                     process.stdout.write((Date.now() - now + 'ms').green.bold);
                     process.stdout.write('\n');
                     break;
