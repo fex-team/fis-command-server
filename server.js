@@ -71,7 +71,7 @@ exports.register = function(commander) {
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
-        .option('--type <php|java|node>', '', String)
+        .option('--type <php|java|node>', 'process language', String)
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
         .action(function(){
