@@ -94,7 +94,7 @@ exports.register = function(commander) {
             }
 
             function download(names) {
-                if(typeof names === 'string'){
+                if((typeof names === 'string') && names.trim().length > 0){
                     var remote = options.repos || fis.config.get(
                         'system.repos', fis.project.DEFAULT_REMOTE_REPOS
                     ).replace(/\/$/, '') + '/server';
