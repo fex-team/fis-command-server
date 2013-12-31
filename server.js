@@ -63,8 +63,9 @@ exports.register = function(commander) {
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, serverRoot)
-        .option('--no-rewrite', 'disable rewrite feature', Boolean)
-        .option('--script <name>', 'rewrite entry file name', String)
+        //.option('--no-rewrite', 'disable rewrite feature', Boolean)
+        .option('--rewrite <script>', 'rewrite entry file name', fis.config.get('server.rewrite', false))
+        //.option('--script <name>', 'rewrite entry file name', String)
         .option('--repos <url>', 'install repository', String)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
@@ -79,6 +80,11 @@ exports.register = function(commander) {
             var options = args.pop();
             var cmd = args.shift();
             var root = options.root;
+
+            if (options.rewrite != false) {
+                options.script = options.rewrite;
+            }
+
             if(root){
                 if(fis.util.exists(root) && !fis.util.isDir(root)){
                     fis.log.error('invalid document root [' + root + ']');
@@ -87,10 +93,6 @@ exports.register = function(commander) {
                 }
             } else {
                 fis.log.error('missing document root');
-            }
-
-            if (fis.config.get('server.rewrite') != undefined) {
-                options['rewrite'] = !!fis.config.get('server.rewrite');
             }
 
             function download(names) {
