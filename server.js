@@ -64,7 +64,7 @@ exports.register = function(commander) {
         .option('-p, --port <int>', 'server listen port', parseInt, 8080)
         .option('--root <path>', 'document root', getRoot, serverRoot)
         //.option('--no-rewrite', 'disable rewrite feature', Boolean)
-        .option('--rewrite <script>', 'rewrite entry file name', fis.config.get('server.rewrite', false))
+        .option('--rewrite <script>', 'enable rewrite mode, rewrite entry file name', String, fis.config.get('server.rewrite', false))
         //.option('--script <name>', 'rewrite entry file name', String)
         .option('--repos <url>', 'install repository', String)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
