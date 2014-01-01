@@ -15,8 +15,5 @@
     "main" : "server.js",
     "scripts" : {
         "test" : "mocha test/ut --recursive"
-    },
-    "dependencies": {
-        "send": "0.1.4"
     }
 }

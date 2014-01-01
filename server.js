@@ -27,7 +27,7 @@ exports.register = function(commander) {
         var globArr = str.split(',');
         var group = [];
         var s_reg;
-        globArr.forEach(function(g, i) {
+        globArr.forEach(function(g) {
             if (g.length > 0) {
                 s_reg = fis.util.glob(g).toString();
                 //replace
@@ -43,8 +43,7 @@ exports.register = function(commander) {
             // '/^' => '', '%/i' => ''
             prefix = s_reg.substr(2, s_reg.length - 5);
         }
-        var reg = new RegExp('^'+ prefix + '(' + group.join('|') + ')$', 'i');
-        return reg;
+        return new RegExp('^'+ prefix + '(' + group.join('|') + ')$', 'i');
     }
 
     var serverRoot = (function(){
@@ -61,18 +60,16 @@ exports.register = function(commander) {
     })();
     
     commander
-        .option('-p, --port <int>', 'server listen port', parseInt, 8080)
+        .option('-p, --port <int>', 'server listen port', parseInt, process.env.FIS_SERVER_PORT || 8080)
         .option('--root <path>', 'document root', getRoot, serverRoot)
-        //.option('--no-rewrite', 'disable rewrite feature', Boolean)
+        .option('--type <php|java|node>', 'process language', String)
         .option('--rewrite <script>', 'enable rewrite mode, rewrite entry file name', String, fis.config.get('server.rewrite', false))
-        //.option('--script <name>', 'rewrite entry file name', String)
-        .option('--repos <url>', 'install repository', String)
+        .option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
         .option('--php_exec <path>', 'path to php-cgi executable file', String, 'php-cgi')
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
-        .option('--type <php|java|node>', 'process language', String)
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
         .action(function(){
@@ -150,18 +147,18 @@ exports.register = function(commander) {
                     var user_exclude = fis.config.get('server.clean.exclude');
                     //flow: command => user => default
                     var include = options.include  ? glob(options.include, root) : (user_include ? glob(user_include, root) : null);
-                    var exclude = options.exclude ? glob(options.exclude, root) : (user_exclude ? glob(user_exclude, root) : /\/WEB-INF\//);
+                    var exclude = options.exclude ? glob(options.exclude, root) : (user_exclude ? glob(user_exclude, root) : /\/WEB-INF\/cgi\//);
                     fis.util.del(root, include, exclude);
                     process.stdout.write((Date.now() - now + 'ms').green.bold);
                     process.stdout.write('\n');
                     break;
                 case 'init':
                     var libs = fis.config.get('server.libs');
-                    if (Object.prototype.toString.apply(libs) == '[object Array]') {
-                        libs.forEach(function(name, index) {
+                    if (fis.util.is(libs, 'Array')) {
+                        libs.forEach(function(name) {
                             download(name);
                         });
-                    } else if(Object.prototype.toString.apply(libs) == '[object String]') {
+                    } else if(fis.util.is(libs, 'String')) {
                         download(libs);
                     }
                     break;
