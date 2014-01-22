@@ -19,13 +19,13 @@
         -h, --help                     output usage information
         -p, --port <int>               server listen port
         --root <path>                  document root
-        --rewrite <script>             enable rewrite mode, rewrite entry file name
+        --type <php|java|node>         process language
+        --rewrite [script]             enable rewrite mode
         --repos <url>                  install repository
         --timeout <seconds>            start timeout
         --php_exec <path>              path to php-cgi executable file
         --php_exec_args <args>         php-cgi arguments
         --php_fcgi_children <int>      the number of php-cgi processes
         --php_fcgi_max_requests <int>  the max number of requests
-        --type <php|java|node>         process language
         --include <glob>               clean include filter
         --exclude <glob>               clean exclude filter
