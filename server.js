@@ -140,7 +140,7 @@ exports.register = function(commander) {
                     server.info();
                     break;
                 case 'open':
-                    server.open();
+                    server.open(root);
                     break;
                 case 'clean':
                     process.stdout.write(' δ '.bold.yellow);
