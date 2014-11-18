@@ -58,7 +58,7 @@ exports.register = function(commander) {
             return fis.project.getTempPath('www');
         }
     })();
-    
+
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, process.env.FIS_SERVER_PORT || 8080)
         .option('--root <path>', 'document root', getRoot, serverRoot)
@@ -168,31 +168,31 @@ exports.register = function(commander) {
                     commander.help();
             }
         });
-    
+
     commander
         .command('start')
         .description('start server');
-    
+
     commander
         .command('stop')
         .description('shutdown server');
-    
+
     commander
         .command('restart')
         .description('restart server');
-    
+
     commander
         .command('info')
         .description('output server info');
-    
+
     commander
         .command('open')
         .description('open document root directory');
-    
+
     commander
         .command('clean')
         .description('clean files in document root');
-    
+
     commander
         .command('install <name>')
         .description('install server framework');

@@ -1,0 +1,16 @@
+{
+  "name": "fis-command-server-script",
+  "description": "This is an simple fis server script.",
+  "version": "0.0.0",
+  "author": "FIS Team <fis@baidu.com>",
+  "homepage": "http://fis.baidu.com/",
+  "keywords": [
+    "fis"
+  ],
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.10.1",
+    "serve-index": "1.5.0",
+    "yog-devtools": "0.0.4"
+  }
+}
