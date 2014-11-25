@@ -62,7 +62,7 @@ exports.register = function(commander) {
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, process.env.FIS_SERVER_PORT || 8080)
         .option('--root <path>', 'document root', getRoot, serverRoot)
-        .option('--type <php|java|node>', 'process language', String)
+        .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type'))
         .option('--rewrite [script]', 'enable rewrite mode', String, fis.config.get('server.rewrite', false))
         .option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
         .option('--timeout <seconds>', 'start timeout', parseInt, 15)
