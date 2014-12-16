@@ -1,7 +1,7 @@
 {
   "name": "fis-command-server",
   "description": "fis server command.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": "FIS Team <fis@baidu.com>",
   "homepage": "http://fis.baidu.com/",
   "keywords": [
@@ -19,7 +19,7 @@
     "test": "mocha test/ut --recursive"
   },
   "dependencies": {
-    "chokidar": "^0.10.5",
+    "chokidar": "0.10.5",
     "step": "0.0.5"
   }
 }
