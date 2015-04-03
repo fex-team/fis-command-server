@@ -70,6 +70,7 @@ exports.register = function(commander) {
         .option('--php_exec_args <args>', 'php-cgi arguments', String)
         .option('--php_fcgi_children <int>', 'the number of php-cgi processes', parseInt)
         .option('--php_fcgi_max_requests <int>', 'the max number of requests', parseInt)
+        .option('--registry <registry>', 'set npm registry', 'https://registry.npmjs.org')
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
         .action(function(){
