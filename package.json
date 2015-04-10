@@ -19,7 +19,7 @@
     "test": "mocha test/ut --recursive"
   },
   "dependencies": {
-    "chokidar": "0.10.5",
+    "chokidar": "~1.0.1",
     "step": "0.0.5",
     "resolve": "1.1.6"
   }
