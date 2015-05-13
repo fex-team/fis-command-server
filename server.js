@@ -46,7 +46,17 @@ exports.register = function(commander) {
         return new RegExp('^'+ prefix + '(' + group.join('|') + ')$', 'i');
     }
 
-    var serverRoot = (function(){
+    function getServerInfo() {
+        var util = require('./lib/util.js');
+        var conf = util.getRCFile();
+        if (fis.util.isFile(conf)) {
+            return require(conf);
+        }
+        return {};
+    }
+
+    var serverRoot = (function() {
+        var serverInfo = getServerInfo();
         var key = 'FIS_SERVER_DOCUMENT_ROOT';
         if(process.env && process.env[key]){
             var path = process.env[key];
@@ -54,6 +64,8 @@ exports.register = function(commander) {
                 fis.log.error('invalid environment variable [' + key + '] of document root [' + path + ']');
             }
             return path;
+        } else if (serverInfo['root']) {
+            return serverInfo['root'];
         } else {
             return fis.project.getTempPath('www');
         }
