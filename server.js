@@ -73,6 +73,7 @@ exports.register = function(commander) {
         .option('--registry <registry>', 'set npm registry', 'https://registry.npmjs.org')
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
+        .option('--https', 'start https server')
         .action(function(){
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();

@@ -9,9 +9,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import php.java.servlet.ContextLoaderListener;
@@ -22,6 +25,7 @@ public class HttpServer {
 	public static void main(String[] args) throws Exception {
 		int port = 8080;
 		boolean rewrite = false;
+		boolean https = false;//是否支持
 		String script = "index.php";
 		String root = System.getProperty("user.dir");
 		HashMap<String, String> map = new HashMap<String, String>();
@@ -45,15 +49,26 @@ public class HttpServer {
 				rewrite = value.equals("true") || value.equals("on") || value.equals("1");
 			} else if(arg.equals("--root")){
 				root = args[++i];
-			} else if(arg.substring(0, 2).equals("--")) {
+			} else if(arg.equals("--https")){
+				https = true;
+			}else if(arg.substring(0, 2).equals("--")) {
 				map.put(arg.substring(2), args[++i]);
 			}
 		}
-		new HttpServer(port, script, rewrite, root, map);
+		new HttpServer(port, script, rewrite, root, map, https);
 	}
-
-	public HttpServer(int port, String script, boolean rewrite, String root, HashMap<String, String> map) {
-		
+	
+	/*
+	 * 生成服务端密钥库
+	 * keytool -genkey -alias fis  -keyalg RSA -dname "cn=127.0.0.1,ou=fis,o=baidu,l=china,st=beijing,c=cn" -keypass 123456 -storepass 123456 -keystore fis.keystore -validity 3600 
+	 * [-keypass]是密钥的密码，[-storepass]是密钥库的密码 
+	 * cn是域名，必须与cas服务器的域名相同(本地测试用127.0.0.1). 
+	 */
+	
+	/**
+	 * 添加https服务器支持
+	 */
+	public HttpServer(int port, String script, boolean rewrite, String root, HashMap<String, String> map,boolean https) {
 		//context
 		HandlerCollection hc = new HandlerCollection();
 		WebAppContext context;
@@ -80,14 +95,31 @@ public class HttpServer {
 			context.addServlet(FastCGIServlet.class, "*.php");
 			context.addEventListener(new ContextLoaderListener());
 		}
-		hc.addHandler(context);
-		Server server = new Server(port);
+			
+		Server server;
+	
+		// 设置ssl连接器，支持https
+		if(https){
+			server = new Server();
+			SslSocketConnector ssl_connector = new SslSocketConnector();
+	        ssl_connector.setPort(port);
+	        SslContextFactory cf = ssl_connector.getSslContextFactory();
+	        //证书放置在插件根目录下，需提供生成时对应的密码
+	        cf.setKeyStorePath("../fis.keystore");
+	        cf.setKeyStorePassword("123456");
+	        cf.setKeyManagerPassword("123456");
+	        server.addConnector(ssl_connector);
+		}else{ //http
+			server = new Server(port);
+		}	
+		hc.addHandler(context);	
 		server.setHandler(hc);
+          
 		try {
 			server.start();
 		} catch(Exception e){
 			System.out.print("fail");
-		}
+		}      
 	}
 
 	private class FISWebAppContext extends WebAppContext {
