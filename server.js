@@ -55,7 +55,15 @@ exports.register = function(commander) {
         return {};
     }
 
-    var serverRoot = (function() {
+    function deleteServerInfo() {
+        var util = require('./lib/util.js');
+        var conf = util.getRCFile();
+        if (fis.util.isFile(conf)) {
+            fis.util.del(conf);
+        }
+    }
+
+    function getServerRoot() {
         var serverInfo = getServerInfo();
         var key = 'FIS_SERVER_DOCUMENT_ROOT';
         if(process.env && process.env[key]){
@@ -69,7 +77,9 @@ exports.register = function(commander) {
         } else {
             return fis.project.getTempPath('www');
         }
-    })();
+    }
+
+    var serverRoot = getServerRoot();
 
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, process.env.FIS_SERVER_PORT || 8080)
@@ -135,6 +145,9 @@ exports.register = function(commander) {
                         }
                     });
                     server.stop(function() {
+                        // 如果要修改 root 每次都得指定，否则以后还不回来了。
+                        deleteServerInfo();
+                        opt.root = getRoot(getServerRoot());
                         server.start(opt);
                     });
                     break;
