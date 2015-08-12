@@ -83,7 +83,7 @@ exports.register = function(commander) {
 
     commander
         .option('-p, --port <int>', 'server listen port', parseInt, process.env.FIS_SERVER_PORT || 8080)
-        .option('--root <path>', 'document root', getRoot, serverRoot)
+        .option('--root <path>', 'document root')
         .option('--type <php|java|node>', 'process language', String, fis.config.get('server.type'))
         .option('--rewrite [script]', 'enable rewrite mode', String, fis.config.get('server.rewrite', false))
         .option('--repos <url>', 'install repository', String, process.env.FIS_SERVER_REPOSITORY)
@@ -100,13 +100,21 @@ exports.register = function(commander) {
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
             var cmd = args.shift();
-            var root = options.root;
             if (options.rewrite) {
                 if(options.rewrite != true){
                     options.script = options.rewrite;
                     options.rewrite = true;
                 }
             }
+
+            var originRoot = options.root;
+            if (!options.root) {
+              options.root = getRoot(getServerRoot());
+            } else {
+              options.root = getRoot(options.root);
+            }
+            var root = options.root;
+
 
             if(root){
                 if(fis.util.exists(root) && !fis.util.isDir(root)){
@@ -147,7 +155,7 @@ exports.register = function(commander) {
                     server.stop(function() {
                         // 如果要修改 root 每次都得指定，否则以后还不回来了。
                         deleteServerInfo();
-                        opt.root = getRoot(getServerRoot());
+                        originRoot || (opt.root = getRoot(getServerRoot()));
                         server.start(opt);
                     });
                     break;
