@@ -29,7 +29,7 @@ exports.register = function(commander) {
         var s_reg;
         globArr.forEach(function(g) {
             if (g.length > 0) {
-                s_reg = fis.util.glob(g).toString();
+                s_reg = fis.util.glob(g, undefined, {nocase: true}).toString();
                 //replace
                 // '/^' => ''
                 // '$/i' => ''
@@ -39,7 +39,7 @@ exports.register = function(commander) {
         });
         prefix = prefix || '';
         if (prefix) {
-            s_reg = fis.util.glob(prefix).toString();
+            s_reg = fis.util.glob(prefix, undefined, {nocase: true}).toString();
             // '/^' => '', '%/i' => ''
             prefix = s_reg.substr(2, s_reg.length - 5);
         }
