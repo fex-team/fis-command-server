@@ -96,6 +96,7 @@ exports.register = function(commander) {
         .option('--include <glob>', 'clean include filter', String)
         .option('--exclude <glob>', 'clean exclude filter', String)
         .option('--https', 'start https server')
+        .option('--qrcode', 'output qrcode with the remote access address.')
         .action(function(){
             var args = Array.prototype.slice.call(arguments);
             var options = args.pop();
